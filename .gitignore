@@ -1,0 +1,45 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Environments and Virtualenv
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Large Model Weights and Binaries (auto-downloaded on first run)
+*.pt
+*.pth
+*.bin
+*.onnx
+models/*
+!models/.gitkeep
+
+# Reference Terrain uploads
+data/reference/*
+!data/reference/.gitkeep
+
+# Output artifacts
+outputs/
+*.log

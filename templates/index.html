@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TERRASCAN-AI // Tactical Camouflage & Anomaly Detection System</title>
+  <!-- Google Fonts JetBrains Mono with monospace fallback for offline resilience -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================================
+       TERRASCAN-AI TACTICAL SITREP CONSOLE STYLESHEET
+       Palette:
+         Background:     #080b06 (Ultra-deep tactical obsidian)
+         Panels:         #0d1209 (Dark matte military olive-black)
+         Borders/Lines:  #384525 (Subtle anodized olive drab)
+         Border Accent:  #4f6334 (Medium olive bracket line)
+         Primary Text:   #c9d6a3 (Crisp night-vision luminescence)
+         Text Muted:     #6b7c52 (Secondary telemetry text)
+         Bright Accent:  #9acd32 (Tactical phosphor lime)
+         Amber Warning:  #e0a526 (Caution / object contact alert)
+         Red Alert:      #d64545 (High-priority threat / breach alert)
+       ========================================================================= */
+
+    :root {
+      --bg-dark: #080b06;
+      --panel-bg: #0d1209;
+      --panel-inner: #0a0e07;
+      --border-olive: #384525;
+      --border-accent: #4f6334;
+      --border-dim: #1e2614;
+      --text-primary: #c9d6a3;
+      --text-muted: #6b7c52;
+      --accent-lime: #9acd32;
+      --accent-glow: rgba(154, 205, 50, 0.25);
+      --amber-warn: #e0a526;
+      --red-alert: #d64545;
+      --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.45;
+      letter-spacing: 0.04em;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      user-select: none;
+    }
+
+    /* Tactical Background Grid & Subtle Cathode Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(to right, rgba(56, 69, 37, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 69, 37, 0.15) 1px, transparent 1px);
+      background-size: 26px 26px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+      background-size: 100% 3px;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.7;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-height: 100vh;
+    }
+
+    /* ---------------- TOP BAR ---------------- */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 16px;
+      background: #0b0f08;
+      border-bottom: 1px solid var(--border-olive);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .top-bar::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent-lime) 30%, var(--accent-lime) 70%, transparent 100%);
+      opacity: 0.35;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .radar-icon {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--accent-lime);
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+    .radar-icon::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: 50%;
+      border: 1px dashed rgba(154, 205, 50, 0.5);
+      animation: radar-sweep 4s linear infinite;
+    }
+    .radar-icon::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 4px; height: 4px;
+      background: var(--accent-lime);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px var(--accent-lime);
+    }
+    @keyframes radar-sweep {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      color: var(--accent-lime);
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(154, 205, 50, 0.35);
+    }
+    .brand-badge {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      background: rgba(154, 205, 50, 0.12);
+      border: 1px solid var(--accent-lime);
+      color: var(--accent-lime);
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+    .brand-sub {
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+    }
+
+    .status-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 3px 8px;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: #070905;
+      border: 1px solid var(--border-olive);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .chip.active {
+      border-color: var(--accent-lime);
+      color: var(--text-primary);
+      box-shadow: 0 0 8px rgba(154, 205, 50, 0.18);
+    }
+    .chip.active .chip-dot {
+      background: var(--accent-lime);
+      box-shadow: 0 0 6px var(--accent-lime);
+    }
+    .chip.warning {
+      border-color: var(--amber-warn);
+      color: var(--amber-warn);
+    }
+    .chip.warning .chip-dot {
+      background: var(--amber-warn);
+      box-shadow: 0 0 6px var(--amber-warn);
+    }
+    .chip-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .live-clock {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--accent-lime);
+      letter-spacing: 0.12em;
+      border-left: 1px solid var(--border-olive);
+      padding-left: 10px;
+      text-shadow: 0 0 6px rgba(154, 205, 50, 0.3);
+    }
+
+    /* ---------------- MAIN 3-COLUMN WORKSPACE ---------------- */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 8px;
+      padding: 8px;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    @media (max-width: 1200px) {
+      .workspace-grid {
+        grid-template-columns: 290px 1fr 320px;
+      }
+    }
+    @media (max-width: 950px) {
+      .app-container {
+        height: auto;
+        max-height: none;
+      }
+      .workspace-grid {
+        grid-template-columns: 1fr;
+        overflow: visible;
+      }
+    }
+
+    /* ---------------- TACTICAL PANELS & CORNERS ---------------- */
+    .tactical-panel {
+      position: relative;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-dim);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+      border-radius: 2px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s ease;
+    }
+    .tactical-panel:hover {
+      border-color: var(--border-accent);
+    }
+
+    /* L-Shaped Corner Brackets */
+    .corner-bracket-tl, .corner-bracket-tr,
+    .corner-bracket-bl, .corner-bracket-br {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      pointer-events: none;
+      z-index: 5;
+      transition: border-color 0.2s;
+    }
+    .corner-bracket-tl {
+      top: -1px; left: -1px;
+      border-top: 2px solid var(--border-accent);
+      border-left: 2px solid var(--border-accent);
+    }
+    .corner-bracket-tr {
+      top: -1px; right: -1px;
+      border-top: 2px solid var(--border-accent);
+      border-right: 2px solid var(--border-accent);
+    }
+    .corner-bracket-bl {
+      bottom: -1px; left: -1px;
+      border-bottom: 2px solid var(--border-accent);
+      border-left: 2px solid var(--border-accent);
+    }
+    .corner-bracket-br {
+      bottom: -1px; right: -1px;
+      border-bottom: 2px solid var(--border-accent);
+      border-right: 2px solid var(--border-accent);
+    }
+    .tactical-panel:hover .corner-bracket-tl,
+    .tactical-panel:hover .corner-bracket-tr,
+    .tactical-panel:hover .corner-bracket-bl,
+    .tactical-panel:hover .corner-bracket-br {
+      border-color: var(--accent-lime);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 12px;
+      background: #090d06;
+      border-bottom: 1px solid var(--border-olive);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .panel-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; width: 36px; height: 2px;
+      background: var(--accent-lime);
+      box-shadow: 0 0 6px var(--accent-lime);
+    }
+    .panel-title {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      color: var(--accent-lime);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-hud {
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      background: rgba(56, 69, 37, 0.25);
+      border: 1px solid var(--border-dim);
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+
+    .panel-body {
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Custom tactical scrollbars */
+    .panel-body::-webkit-scrollbar,
+    .log-scroller::-webkit-scrollbar {
+      width: 4px;
+    }
+    .panel-body::-webkit-scrollbar-thumb,
+    .log-scroller::-webkit-scrollbar-thumb {
+      background: var(--border-olive);
+      border-radius: 2px;
+    }
+    .panel-body::-webkit-scrollbar-thumb:hover,
+    .log-scroller::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-lime);
+    }
+
+    /* ---------------- SECTION 01: CONTROLS & INPUT ---------------- */
+    .upload-zone {
+      border: 1px dashed var(--border-olive);
+      background: rgba(10, 14, 7, 0.7);
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.05);
+      box-shadow: inset 0 0 14px rgba(154, 205, 50, 0.12), 0 0 8px rgba(154, 205, 50, 0.15);
+    }
+    .crosshair-icon {
+      font-size: 20px;
+      color: var(--accent-lime);
+      margin-bottom: 4px;
+      line-height: 1;
+      text-shadow: 0 0 6px var(--accent-lime);
+    }
+    .upload-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .upload-sub {
+      font-size: 8.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .file-preview-strip {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #080c06;
+      border: 1px solid var(--border-olive);
+      padding: 6px 8px;
+      font-size: 9.5px;
+      border-radius: 2px;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .file-preview-strip img {
+      width: 34px;
+      height: 34px;
+      object-fit: cover;
+      border: 1px solid var(--border-olive);
+      border-radius: 2px;
+    }
+    .preview-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .preview-name {
+      color: var(--accent-lime);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .preview-dims {
+      color: var(--text-muted);
+      font-size: 8.5px;
+      margin-top: 2px;
+    }
+
+    /* Samples Buttons */
+    .section-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sample-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5px;
+    }
+    .btn-sample {
+      background: #080c06;
+      border: 1px solid var(--border-olive);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 7px 4px;
+      text-align: center;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: all 0.15s;
+      border-radius: 2px;
+      position: relative;
+    }
+    .btn-sample .sample-tag {
+      color: var(--accent-lime);
+      font-weight: 800;
+      display: block;
+      font-size: 9.5px;
+    }
+    .btn-sample .sample-desc {
+      color: var(--text-muted);
+      font-size: 8px;
+      margin-top: 2px;
+      display: block;
+    }
+    .btn-sample:hover {
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.06);
+    }
+    .btn-sample.active {
+      background: rgba(154, 205, 50, 0.14);
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      box-shadow: 0 0 8px rgba(154, 205, 50, 0.25), inset 0 0 6px rgba(154, 205, 50, 0.1);
+    }
+    .btn-sample.active::before {
+      content: '●';
+      position: absolute;
+      top: 2px; right: 3px;
+      font-size: 6px;
+      color: var(--accent-lime);
+    }
+
+    /* Sliders & Controls */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: rgba(8, 12, 6, 0.6);
+      border: 1px solid var(--border-dim);
+      padding: 6px 8px;
+      border-radius: 2px;
+      transition: border-color 0.15s;
+    }
+    .control-group:hover {
+      border-color: var(--border-olive);
+    }
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9.5px;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .val-readout {
+      color: var(--accent-lime);
+      font-weight: 700;
+      font-size: 10px;
+      background: rgba(154, 205, 50, 0.08);
+      border: 1px solid rgba(154, 205, 50, 0.25);
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #141b10;
+      outline: none;
+      border: 1px solid var(--border-olive);
+      border-radius: 1px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      background: var(--accent-lime);
+      cursor: pointer;
+      border: 1px solid #ffffff;
+      box-shadow: 0 0 6px var(--accent-lime);
+      border-radius: 1px;
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      background: var(--accent-lime);
+      cursor: pointer;
+      border: 1px solid #ffffff;
+      box-shadow: 0 0 6px var(--accent-lime);
+      border-radius: 1px;
+    }
+
+    /* Checkboxes */
+    .checkboxes-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #080c06;
+      border: 1px solid var(--border-dim);
+      padding: 8px 10px;
+      border-radius: 2px;
+    }
+    .tactical-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 9.5px;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      user-select: none;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+    }
+    .tactical-checkbox:hover {
+      color: var(--accent-lime);
+    }
+    .tactical-checkbox input {
+      display: none;
+    }
+    .check-box {
+      width: 13px;
+      height: 13px;
+      border: 1px solid var(--border-olive);
+      background: #0d1209;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--accent-lime);
+      font-weight: 800;
+      border-radius: 1px;
+      transition: all 0.15s;
+    }
+    .tactical-checkbox input:checked + .check-box {
+      border-color: var(--accent-lime);
+      box-shadow: 0 0 6px rgba(154, 205, 50, 0.3);
+    }
+    .tactical-checkbox input:checked + .check-box::after {
+      content: '✓';
+    }
+
+    /* Reference Images Subpanel */
+    .reference-box {
+      background: #080c06;
+      border: 1px solid var(--border-dim);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-radius: 2px;
+    }
+    .ref-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 8.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .ref-status-val {
+      color: var(--accent-lime);
+      font-weight: 700;
+    }
+    .ref-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-ref {
+      flex: 1;
+      background: #0d1209;
+      border: 1px solid var(--border-olive);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 2px;
+    }
+    .btn-ref:hover {
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.08);
+    }
+    .btn-ref.clear:hover {
+      border-color: var(--red-alert);
+      color: var(--red-alert);
+      background: rgba(214, 69, 69, 0.08);
+    }
+
+    /* MISSION ACTION BUTTON (RUN ANALYSIS) */
+    .btn-run {
+      background: linear-gradient(180deg, rgba(154, 205, 50, 0.18) 0%, rgba(154, 205, 50, 0.06) 100%);
+      border: 1px solid var(--accent-lime);
+      color: var(--accent-lime);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 11px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      margin-top: auto;
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(154, 205, 50, 0.15);
+      overflow: hidden;
+    }
+    .btn-run::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(154, 205, 50, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .btn-run:hover:not(:disabled)::before {
+      left: 100%;
+    }
+    .btn-run:hover:not(:disabled) {
+      background: var(--accent-lime);
+      color: #070905;
+      box-shadow: 0 0 18px rgba(154, 205, 50, 0.5);
+      transform: translateY(-1px);
+    }
+    .btn-run:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      animation: pulse-glow 1.5s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0% { border-color: var(--accent-lime); box-shadow: 0 0 4px var(--accent-lime); }
+      50% { border-color: var(--amber-warn); box-shadow: 0 0 14px var(--amber-warn); color: var(--amber-warn); }
+      100% { border-color: var(--accent-lime); box-shadow: 0 0 4px var(--accent-lime); }
+    }
+
+    /* ---------------- SECTION 02: IMAGE VIEWER ---------------- */
+    .viewer-panel {
+      position: relative;
+    }
+    .layer-tabs {
+      display: flex;
+      background: #090d06;
+      border-bottom: 1px solid var(--border-olive);
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .layer-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .layer-tab {
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border-dim);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tab-num {
+      font-size: 8.5px;
+      color: var(--text-muted);
+      border: 1px solid var(--border-dim);
+      padding: 0 4px;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+    .layer-tab:hover {
+      color: var(--text-primary);
+      background: rgba(56, 69, 37, 0.2);
+    }
+    .layer-tab.active {
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.1);
+      border-bottom: 2px solid var(--accent-lime);
+      box-shadow: inset 0 -4px 6px -4px var(--accent-lime);
+    }
+    .layer-tab.active .tab-num {
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.15);
+    }
+
+    .viewer-viewport {
+      flex: 1;
+      position: relative;
+      background: #050704;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+    }
+
+    /* Dynamic Hairline Crosshairs (HUD Targeting Line Tracking) */
+    .hud-crosshair-h, .hud-crosshair-v {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(154, 205, 50, 0.28);
+      z-index: 18;
+      display: none;
+    }
+    .hud-crosshair-h {
+      left: 0; right: 0; height: 1px;
+    }
+    .hud-crosshair-v {
+      top: 0; bottom: 0; width: 1px;
+    }
+
+    /* Tactical Viewport Corner Reticles */
+    .reticle-corner {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .reticle-corner.tl {
+      top: 8px; left: 8px;
+      border-top: 1px solid rgba(154, 205, 50, 0.5);
+      border-left: 1px solid rgba(154, 205, 50, 0.5);
+    }
+    .reticle-corner.tr {
+      top: 8px; right: 8px;
+      border-top: 1px solid rgba(154, 205, 50, 0.5);
+      border-right: 1px solid rgba(154, 205, 50, 0.5);
+    }
+    .reticle-corner.bl {
+      bottom: 8px; left: 8px;
+      border-bottom: 1px solid rgba(154, 205, 50, 0.5);
+      border-left: 1px solid rgba(154, 205, 50, 0.5);
+    }
+    .reticle-corner.br {
+      bottom: 8px; right: 8px;
+      border-bottom: 1px solid rgba(154, 205, 50, 0.5);
+      border-right: 1px solid rgba(154, 205, 50, 0.5);
+    }
+
+    /* Tactical Coordinate Ticks */
+    .coord-tick {
+      position: absolute;
+      font-size: 8.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .coord-tick.tl { top: 12px; left: 26px; }
+    .coord-tick.tr { top: 12px; right: 120px; }
+    .coord-tick.bl { bottom: 12px; left: 26px; }
+    .coord-tick.br { bottom: 12px; right: 26px; }
+
+    /* Interactive Crosshair readout */
+    .crosshair-hud {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 14, 7, 0.9);
+      border: 1px solid var(--border-olive);
+      padding: 3px 12px;
+      font-size: 9px;
+      color: var(--text-primary);
+      letter-spacing: 0.12em;
+      z-index: 20;
+      pointer-events: none;
+      display: flex;
+      gap: 14px;
+      border-radius: 2px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .crosshair-hud span {
+      color: var(--accent-lime);
+      font-weight: 700;
+    }
+
+    /* Viewer Canvas Wrapper */
+    .canvas-stage {
+      position: relative;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+    }
+
+    .viewer-img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* Split Comparison Slider */
+    .split-slider-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .split-layer {
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    .split-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent-lime);
+      box-shadow: 0 0 10px var(--accent-lime);
+      cursor: ew-resize;
+      pointer-events: auto;
+      z-index: 30;
+    }
+    .split-handle::before, .split-handle::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: rgba(154, 205, 50, 0.4);
+    }
+    .split-handle::before { left: -3px; }
+    .split-handle::after { right: -3px; }
+
+    .split-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #090d06;
+      border: 1px solid var(--accent-lime);
+      color: var(--accent-lime);
+      font-size: 8.5px;
+      font-weight: 800;
+      padding: 3px 6px;
+      letter-spacing: 0.08em;
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(154, 205, 50, 0.35);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    /* Clickable Tactical Markers */
+    .region-marker-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 25;
+    }
+    .tactical-marker-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tactical-marker-pin:hover,
+    .tactical-marker-pin.active-pin {
+      transform: translate(-50%, -50%) scale(1.35) !important;
+      z-index: 50;
+    }
+    .pin-ring {
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--red-alert);
+      border-radius: 50%;
+      background: rgba(214, 69, 69, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .pin-ring::after {
+      content: '';
+      position: absolute;
+      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border-radius: 50%;
+      border: 1px solid var(--red-alert);
+      opacity: 0.7;
+      animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes radar-ping {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    .pin-center {
+      width: 4px;
+      height: 4px;
+      background: var(--red-alert);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--red-alert);
+    }
+    .pin-label {
+      background: #090d06;
+      border: 1px solid var(--red-alert);
+      color: var(--red-alert);
+      font-size: 8px;
+      font-weight: 800;
+      padding: 1px 4px;
+      margin-top: 3px;
+      white-space: nowrap;
+      border-radius: 2px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+    }
+    .tactical-marker-pin.active-pin .pin-label {
+      background: var(--red-alert);
+      color: #ffffff;
+    }
+
+    /* Viewer Controls Floating Bar */
+    .viewer-controls-bar {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      display: flex;
+      gap: 3px;
+      z-index: 20;
+    }
+    .btn-view-tool {
+      background: rgba(9, 13, 6, 0.88);
+      border: 1px solid var(--border-olive);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+    .btn-view-tool:hover, .btn-view-tool.active {
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.12);
+      box-shadow: 0 0 8px rgba(154, 205, 50, 0.25);
+    }
+
+    /* ---------------- SECTION 03: SITREP & GAUGE ---------------- */
+    .gauge-card {
+      background: #080c06;
+      border: 1px solid var(--border-olive);
+      padding: 10px 10px 8px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      border-radius: 2px;
+    }
+    .gauge-svg-wrap {
+      width: 180px;
+      height: 98px;
+      position: relative;
+    }
+    .gauge-readout {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    .gauge-number {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent-lime);
+      text-shadow: 0 0 10px rgba(154, 205, 50, 0.4);
+    }
+    .gauge-max {
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-top: 1px;
+    }
+    .threat-badge {
+      margin-top: 6px;
+      padding: 2px 10px;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: #0d1209;
+      border: 1px solid var(--accent-lime);
+      color: var(--accent-lime);
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    /* Tactical Tables */
+    .sitrep-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5px;
+      text-align: left;
+    }
+    .sitrep-table th {
+      background: #060904;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-olive);
+      padding: 4px 6px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .sitrep-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border-dim);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .sitrep-table tr {
+      transition: background-color 0.15s;
+    }
+    .sitrep-table tr:hover {
+      background: rgba(154, 205, 50, 0.08);
+      cursor: pointer;
+    }
+    .sitrep-table tr.active-row {
+      background: rgba(154, 205, 50, 0.16);
+      border-left: 2px solid var(--accent-lime);
+    }
+    .sitrep-table .rank-tag {
+      color: var(--red-alert);
+      font-weight: 800;
+    }
+    
+    /* Micro-score meter in table cell */
+    .score-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .score-bar-bg {
+      width: 32px;
+      height: 4px;
+      background: #141b10;
+      overflow: hidden;
+      border-radius: 1px;
+    }
+    .score-bar-fill {
+      height: 100%;
+      background: var(--accent-lime);
+    }
+    .score-tag {
+      color: var(--accent-lime);
+      font-weight: 700;
+      min-width: 32px;
+    }
+
+    .obj-badge {
+      background: rgba(224, 165, 38, 0.14);
+      border: 1px solid var(--amber-warn);
+      color: var(--amber-warn);
+      font-weight: 700;
+      padding: 1px 5px;
+      font-size: 8.5px;
+      border-radius: 2px;
+      letter-spacing: 0.08em;
+    }
+
+    /* Timings Meter */
+    .timings-meter {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 9px;
+      background: #080c06;
+      border: 1px solid var(--border-dim);
+      padding: 6px 8px;
+      border-radius: 2px;
+    }
+    .timing-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .timing-label {
+      width: 65px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 8.5px;
+    }
+    .timing-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: #141b10;
+      overflow: hidden;
+      border-radius: 1px;
+    }
+    .timing-bar-fill {
+      height: 100%;
+      background: var(--accent-lime);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .timing-val {
+      width: 38px;
+      text-align: right;
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    /* Scrolling Log Console */
+    .log-scroller {
+      background: #050704;
+      border: 1px solid var(--border-dim);
+      height: 110px;
+      padding: 6px 8px;
+      font-size: 9px;
+      line-height: 1.45;
+      overflow-y: auto;
+      color: var(--accent-lime);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-radius: 2px;
+    }
+    .log-line {
+      white-space: pre-wrap;
+      word-break: break-all;
+      display: flex;
+      gap: 6px;
+    }
+    .log-ts {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      font-size: 8.5px;
+    }
+    .log-txt {
+      flex: 1;
+    }
+    .log-line.warn .log-txt { color: var(--amber-warn); }
+    .log-line.error .log-txt { color: var(--red-alert); }
+
+    /* ---------------- BOTTOM ACTIONS BAR ---------------- */
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 16px;
+      background: #090d06;
+      border-top: 1px solid var(--border-olive);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .bottom-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-action {
+      background: #0d1209;
+      border: 1px solid var(--border-olive);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 2px;
+    }
+    .btn-action:hover {
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.08);
+      box-shadow: 0 0 8px rgba(154, 205, 50, 0.2);
+    }
+    .btn-action.primary {
+      border-color: var(--accent-lime);
+      color: var(--accent-lime);
+      background: rgba(154, 205, 50, 0.12);
+      box-shadow: 0 0 8px rgba(154, 205, 50, 0.25);
+    }
+    .btn-action.primary:hover {
+      background: var(--accent-lime);
+      color: #070905;
+      box-shadow: 0 0 14px rgba(154, 205, 50, 0.5);
+    }
+    .btn-action.danger:hover {
+      border-color: var(--red-alert);
+      color: var(--red-alert);
+      background: rgba(214, 69, 69, 0.1);
+      box-shadow: 0 0 8px rgba(214, 69, 69, 0.25);
+    }
+
+    .hotkey-hints {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+    .hotkey-hints kbd {
+      background: #141b10;
+      border: 1px solid var(--border-olive);
+      padding: 1px 5px;
+      color: var(--text-primary);
+      border-radius: 2px;
+    }
+
+    /* Red Toast Alerts */
+    .toast-container {
+      position: fixed;
+      bottom: 50px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast-alert {
+      background: #140808;
+      border: 1px solid var(--red-alert);
+      color: #ff9e9e;
+      font-size: 10.5px;
+      padding: 9px 13px;
+      box-shadow: 0 0 12px rgba(214, 69, 69, 0.45);
+      animation: slide-in 0.25s ease-out;
+      max-width: 340px;
+      border-radius: 2px;
+    }
+    @keyframes slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="brand-section">
+        <span class="radar-icon"></span>
+        <span class="brand-title">TERRASCAN-AI</span>
+        <span class="brand-badge">TACTICAL V2.0</span>
+        <span class="brand-sub">// SENSOR INTEL & CONCEALMENT INTERCEPT</span>
+      </div>
+      <div class="status-chips">
+        <div class="chip" id="chip-device"><span class="chip-dot"></span><span id="chip-device-val">DEVICE: DETECTING...</span></div>
+        <div class="chip" id="chip-camo"><span class="chip-dot"></span><span id="chip-camo-val">CAMO: RESIDUAL+LAB</span></div>
+        <div class="chip" id="chip-anomaly"><span class="chip-dot"></span><span id="chip-anomaly-val">ANOMALY: PATCHCORE</span></div>
+        <div class="chip" id="chip-yolo"><span class="chip-dot"></span><span id="chip-yolo-val">YOLO: ONLINE</span></div>
+        <div class="live-clock" id="live-utc-clock">00:00:00 UTC</div>
+      </div>
+    </header>
+
+    <!-- 3-COLUMN TACTICAL WORKSPACE -->
+    <main class="workspace-grid">
+      
+      <!-- COLUMN 01: INPUT & CONTROLS -->
+      <section class="tactical-panel" id="panel-input">
+        <span class="corner-bracket-tl"></span>
+        <span class="corner-bracket-tr"></span>
+        <span class="corner-bracket-bl"></span>
+        <span class="corner-bracket-br"></span>
+        <div class="panel-header">
+          <span class="panel-title">[ 01 // INPUT & CONTROLS ]</span>
+          <span class="panel-hud">PARAM CONFIG</span>
+        </div>
+        <div class="panel-body">
+          
+          <!-- Image Dropzone -->
+          <div class="upload-zone" id="drop-zone">
+            <div class="crosshair-icon">⊕</div>
+            <div class="upload-label">INGEST SENSOR IMAGERY</div>
+            <div class="upload-sub">DRAG & DROP OR CLICK TO BROWSE (MAX 15 MB)</div>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+          </div>
+
+          <!-- Uploaded Preview Strip -->
+          <div class="file-preview-strip" id="file-preview-strip">
+            <img id="preview-thumb" src="" alt="Thumbnail">
+            <div class="preview-info">
+              <div class="preview-name" id="preview-filename">image.png</div>
+              <div class="preview-dims" id="preview-meta">0x0 px</div>
+            </div>
+          </div>
+
+          <!-- Synthetic Terrain Samples -->
+          <div>
+            <div class="section-label">
+              <span>SYNTHETIC RECON PAYLOADS</span>
+              <span style="color:var(--accent-lime)">READY</span>
+            </div>
+            <div class="sample-grid">
+              <button class="btn-sample" id="btn-sample-1" onclick="loadSample(1)">
+                <span class="sample-tag">[ 01 ]</span>
+                <span class="sample-name">FOLIAGE</span>
+                <span class="sample-desc">CAMO VEHICLE</span>
+              </button>
+              <button class="btn-sample" id="btn-sample-2" onclick="loadSample(2)">
+                <span class="sample-tag">[ 02 ]</span>
+                <span class="sample-name">AERIAL</span>
+                <span class="sample-desc">RUNWAY DIG</span>
+              </button>
+              <button class="btn-sample" id="btn-sample-3" onclick="loadSample(3)">
+                <span class="sample-tag">[ 03 ]</span>
+                <span class="sample-name">SCRUB</span>
+                <span class="sample-desc">BUNKER NET</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tactical Parameter Sliders -->
+          <div class="control-group">
+            <div class="control-header">
+              <span>CAMOUFLAGE SENSITIVITY</span>
+              <span class="val-readout" id="lbl-camo-thresh">[ 0.50 ]</span>
+            </div>
+            <input type="range" id="slider-camo-thresh" min="0.10" max="0.90" step="0.05" value="0.50">
+          </div>
+
+          <div class="control-group">
+            <div class="control-header">
+              <span>FUSION BALANCE</span>
+              <span class="val-readout" id="lbl-fusion-weight">C:60% / A:40%</span>
+            </div>
+            <input type="range" id="slider-fusion-weight" min="0.0" max="1.0" step="0.05" value="0.60">
+          </div>
+
+          <div class="control-group">
+            <div class="control-header">
+              <span>OBJECT CONFIDENCE</span>
+              <span class="val-readout" id="lbl-obj-conf">[ 0.25 ]</span>
+            </div>
+            <input type="range" id="slider-obj-conf" min="0.05" max="0.95" step="0.05" value="0.25">
+          </div>
+
+          <div class="control-group">
+            <div class="control-header">
+              <span>OVERLAY OPACITY</span>
+              <span class="val-readout" id="lbl-opacity">[ 60% ]</span>
+            </div>
+            <input type="range" id="slider-opacity" min="0.10" max="1.00" step="0.05" value="0.60">
+          </div>
+
+          <!-- Sensor Module Checkboxes -->
+          <div class="checkboxes-group">
+            <label class="tactical-checkbox">
+              <input type="checkbox" id="chk-enable-camo" checked>
+              <span class="check-box"></span>
+              <span>CAMOUFLAGE INTERCEPT ENGINE</span>
+            </label>
+            <label class="tactical-checkbox">
+              <input type="checkbox" id="chk-enable-anomaly" checked>
+              <span class="check-box"></span>
+              <span>PATCHCORE ANOMALY DETECTOR</span>
+            </label>
+            <label class="tactical-checkbox">
+              <input type="checkbox" id="chk-enable-objects" checked>
+              <span class="check-box"></span>
+              <span>YOLOV8 TACTICAL RECOGNITION</span>
+            </label>
+          </div>
+
+          <!-- Reference Terrain Management -->
+          <div class="reference-box">
+            <div class="ref-header">
+              <span>REFERENCE TERRAIN MEMORY</span>
+              <span class="ref-status-val" id="ref-status-val">0 REF (SELF-REF)</span>
+            </div>
+            <div class="ref-actions">
+              <button class="btn-ref" onclick="document.getElementById('ref-file-input').click()">+ ADD REF</button>
+              <button class="btn-ref clear" onclick="clearReferences()">CLEAR</button>
+              <input type="file" id="ref-file-input" accept="image/*" multiple style="display: none;">
+            </div>
+          </div>
+
+          <!-- Mission Action Button -->
+          <button class="btn-run" id="btn-run-analysis" onclick="runAnalysis()">
+            ⚡ RUN TACTICAL ANALYSIS
+          </button>
+
+        </div>
+      </section>
+
+      <!-- COLUMN 02: IMAGE VIEWER -->
+      <section class="tactical-panel viewer-panel" id="panel-viewer">
+        <span class="corner-bracket-tl"></span>
+        <span class="corner-bracket-tr"></span>
+        <span class="corner-bracket-bl"></span>
+        <span class="corner-bracket-br"></span>
+        
+        <!-- Viewer Tabs -->
+        <nav class="layer-tabs" id="layer-tabs">
+          <button class="layer-tab active" data-layer="all_layers"><span class="tab-num">6</span> ALL CONTACTS</button>
+          <button class="layer-tab" data-layer="suspicion"><span class="tab-num">5</span> SUSPICION</button>
+          <button class="layer-tab" data-layer="camouflage"><span class="tab-num">2</span> CAMOUFLAGE</button>
+          <button class="layer-tab" data-layer="anomaly"><span class="tab-num">3</span> ANOMALY</button>
+          <button class="layer-tab" data-layer="objects"><span class="tab-num">4</span> OBJECTS</button>
+          <button class="layer-tab" data-layer="original"><span class="tab-num">1</span> RAW BASE</button>
+        </nav>
+
+        <div class="viewer-viewport" id="viewer-viewport">
+          <!-- Dynamic Crosshair Hairlines -->
+          <div class="hud-crosshair-h" id="hud-hairline-h"></div>
+          <div class="hud-crosshair-v" id="hud-hairline-v"></div>
+
+          <!-- Corner Reticles -->
+          <div class="reticle-corner tl"></div>
+          <div class="reticle-corner tr"></div>
+          <div class="reticle-corner bl"></div>
+          <div class="reticle-corner br"></div>
+
+          <!-- Tactical Coordinate Grid Ticks -->
+          <div class="coord-tick tl">+ 34°12'44"N</div>
+          <div class="coord-tick tr">+ 71°28'10"E</div>
+          <div class="coord-tick bl">GRID: TS-24</div>
+          <div class="coord-tick br">FOV: 120°</div>
+
+          <!-- Top-right zoom tools -->
+          <div class="viewer-controls-bar">
+            <button class="btn-view-tool" id="btn-toggle-split" onclick="toggleSplitView()" title="Toggle Split Slider">SPLIT VIEW</button>
+            <button class="btn-view-tool" onclick="zoomIn()" title="Zoom In (+)">+</button>
+            <button class="btn-view-tool" onclick="zoomOut()" title="Zoom Out (-)">-</button>
+            <button class="btn-view-tool" onclick="resetZoom()" title="Reset Zoom (1:1)">1:1</button>
+          </div>
+
+          <!-- Dynamic Crosshair HUD -->
+          <div class="crosshair-hud" id="crosshair-hud">
+            <div>COORDINATES: <span id="hud-xy">X: ---  Y: ---</span></div>
+            <div>STATUS: <span id="hud-score">---</span></div>
+          </div>
+
+          <!-- Canvas / Image Rendering Stage -->
+          <div class="canvas-stage" id="canvas-stage">
+            <img id="main-view-img" class="viewer-img" src="" alt="Tactical Imagery" style="display:none;">
+
+            <!-- Split slider comparison layer -->
+            <div class="split-slider-container" id="split-container" style="display:none;">
+              <div class="split-layer" id="split-left-layer">
+                <img id="split-original-img" class="viewer-img" src="" alt="Original Base">
+              </div>
+              <div class="split-handle" id="split-handle" style="left: 50%;">
+                <div class="split-badge">BASE ◄► OVERLAY</div>
+              </div>
+            </div>
+
+            <!-- Clickable Sector Marker Overlay -->
+            <div class="region-marker-overlay" id="region-marker-overlay"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 03: SITREP -->
+      <section class="tactical-panel" id="panel-sitrep">
+        <span class="corner-bracket-tl"></span>
+        <span class="corner-bracket-tr"></span>
+        <span class="corner-bracket-bl"></span>
+        <span class="corner-bracket-br"></span>
+        <div class="panel-header">
+          <span class="panel-title">[ 03 // SITREP ]</span>
+          <span class="panel-hud">INTERCEPT REPORT</span>
+        </div>
+        <div class="panel-body">
+          
+          <!-- Semi-circular Threat Gauge -->
+          <div class="gauge-card">
+            <div class="gauge-svg-wrap">
+              <svg width="180" height="98" viewBox="0 0 180 98">
+                <!-- Outer dashed tick orbit -->
+                <path d="M 22 88 A 68 68 0 0 1 158 88" fill="none" stroke="#253118" stroke-width="1" stroke-dasharray="2 4" />
+                
+                <!-- Background Arc -->
+                <path d="M 25 88 A 65 65 0 0 1 155 88" fill="none" stroke="#161f10" stroke-width="11" stroke-linecap="butt" />
+                
+                <!-- Tick lines at 0, 25, 50, 75, 100 -->
+                <line x1="14" y1="88" x2="22" y2="88" stroke="#384525" stroke-width="1.5" />
+                <line x1="39" y1="37" x2="45" y2="43" stroke="#384525" stroke-width="1.5" />
+                <line x1="90" y1="12" x2="90" y2="20" stroke="#384525" stroke-width="1.5" />
+                <line x1="141" y1="37" x2="135" y2="43" stroke="#384525" stroke-width="1.5" />
+                <line x1="166" y1="88" x2="158" y2="88" stroke="#384525" stroke-width="1.5" />
+
+                <text x="14" y="96" fill="#6b7c52" font-size="7" font-family="'JetBrains Mono', monospace">0</text>
+                <text x="86" y="9" fill="#6b7c52" font-size="7" font-family="'JetBrains Mono', monospace">50</text>
+                <text x="156" y="96" fill="#6b7c52" font-size="7" font-family="'JetBrains Mono', monospace">100</text>
+
+                <!-- Dynamic Threat Arc -->
+                <path id="gauge-arc" d="M 25 88 A 65 65 0 0 1 155 88" fill="none" stroke="#9acd32" stroke-width="11" stroke-linecap="butt" stroke-dasharray="204.2" stroke-dashoffset="204.2" />
+              </svg>
+              <div class="gauge-readout">
+                <div class="gauge-number" id="threat-index-val">0</div>
+                <div class="gauge-max">THREAT INDEX / 100</div>
+              </div>
+            </div>
+            <div class="threat-badge" id="threat-level-badge">SYSTEM STANDBY</div>
+          </div>
+
+          <!-- Top Suspicious Regions Table -->
+          <div>
+            <div class="section-label">
+              <span>TOP SUSPICIOUS CONTACTS</span>
+              <span id="lbl-anom-count" style="color:var(--text-muted)">0 SECTORS</span>
+            </div>
+            <table class="sitrep-table" id="table-regions">
+              <thead>
+                <tr>
+                  <th>RANK</th>
+                  <th>BOUNDS [X,Y,W,H]</th>
+                  <th>AREA</th>
+                  <th>SCORE</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-regions">
+                <tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:12px;">NO ANOMALIES RECORDED</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Detected Objects Table -->
+          <div>
+            <div class="section-label">
+              <span>RECOGNIZED OBJECTS</span>
+              <span id="lbl-obj-count" style="color:var(--text-muted)">0 CONTACTS</span>
+            </div>
+            <table class="sitrep-table" id="table-objects">
+              <thead>
+                <tr>
+                  <th>CLASS</th>
+                  <th>CONF</th>
+                  <th>COORDINATES</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-objects">
+                <tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:12px;">NO OBJECT CONTACTS</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Stage Timings Breakdown -->
+          <div>
+            <div class="section-label">PIPELINE EXECUTION METRICS</div>
+            <div class="timings-meter">
+              <div class="timing-row">
+                <span class="timing-label">CAMO</span>
+                <div class="timing-bar-wrap"><div class="timing-bar-fill" id="bar-camo"></div></div>
+                <span class="timing-val" id="time-camo">0.00s</span>
+              </div>
+              <div class="timing-row">
+                <span class="timing-label">ANOMALY</span>
+                <div class="timing-bar-wrap"><div class="timing-bar-fill" id="bar-anomaly"></div></div>
+                <span class="timing-val" id="time-anomaly">0.00s</span>
+              </div>
+              <div class="timing-row">
+                <span class="timing-label">OBJECTS</span>
+                <div class="timing-bar-wrap"><div class="timing-bar-fill" id="bar-objects"></div></div>
+                <span class="timing-val" id="time-objects">0.00s</span>
+              </div>
+              <div class="timing-row">
+                <span class="timing-label">FUSION</span>
+                <div class="timing-bar-wrap"><div class="timing-bar-fill" id="bar-fusion"></div></div>
+                <span class="timing-val" id="time-fusion">0.00s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scrolling Console Log -->
+          <div>
+            <div class="section-label">MISSION LOG CONSOLE</div>
+            <div class="log-scroller" id="log-scroller">
+              <div class="log-line"><span class="log-ts">[BOOT]</span><span class="log-txt">TERRASCAN-AI CORE ENGINE READY</span></div>
+              <div class="log-line"><span class="log-ts">[IDLE]</span><span class="log-txt">AWAITING INGESTION OF TERRAIN PAYLOAD...</span></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM ACTION BAR -->
+    <footer class="bottom-bar">
+      <div class="bottom-actions">
+        <button class="btn-action primary" onclick="exportReportPNG()">↓ EXPORT DOSSIER PNG</button>
+        <button class="btn-action" onclick="exportAnalysisJSON()">↓ TELEMETRY JSON</button>
+        <button class="btn-action danger" onclick="clearAnalysis()">✕ RESET</button>
+      </div>
+      <div class="hotkey-hints">
+        HOTKEYS: <kbd>R</kbd> RUN ANALYSIS &nbsp;|&nbsp; <kbd>1-6</kbd> LAYERS &nbsp;|&nbsp; <kbd>S</kbd> SPLIT &nbsp;|&nbsp; <kbd>ESC</kbd> RESET
+      </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <!-- =========================================================================
+       TERRASCAN-AI CLIENT LOGIC (VANILLA JS, NO EXTERNAL LIBS)
+       ========================================================================= -->
+  <script>
+    // Application State
+    const state = {
+      activeImageFile: null,
+      activeSampleId: 1,
+      currentResult: null,
+      activeLayer: 'all_layers',
+      splitViewActive: false,
+      splitPercent: 50,
+      zoomLevel: 1.0,
+      panX: 0,
+      panY: 0,
+      isPanning: false,
+      startPanX: 0,
+      startPanY: 0,
+      isDraggingSplit: false,
+    };
+
+    // DOM Elements
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const filePreviewStrip = document.getElementById('file-preview-strip');
+    const previewThumb = document.getElementById('preview-thumb');
+    const previewFilename = document.getElementById('preview-filename');
+    const previewMeta = document.getElementById('preview-meta');
+
+    const sliderCamoThresh = document.getElementById('slider-camo-thresh');
+    const lblCamoThresh = document.getElementById('lbl-camo-thresh');
+    const sliderFusionWeight = document.getElementById('slider-fusion-weight');
+    const lblFusionWeight = document.getElementById('lbl-fusion-weight');
+    const sliderObjConf = document.getElementById('slider-obj-conf');
+    const lblObjConf = document.getElementById('lbl-obj-conf');
+    const sliderOpacity = document.getElementById('slider-opacity');
+    const lblOpacity = document.getElementById('lbl-opacity');
+
+    const chkEnableCamo = document.getElementById('chk-enable-camo');
+    const chkEnableAnomaly = document.getElementById('chk-enable-anomaly');
+    const chkEnableObjects = document.getElementById('chk-enable-objects');
+
+    const btnRun = document.getElementById('btn-run-analysis');
+    const logScroller = document.getElementById('log-scroller');
+    const mainViewImg = document.getElementById('main-view-img');
+    const splitContainer = document.getElementById('split-container');
+    const splitLeftLayer = document.getElementById('split-left-layer');
+    const splitOriginalImg = document.getElementById('split-original-img');
+    const splitHandle = document.getElementById('split-handle');
+    const canvasStage = document.getElementById('canvas-stage');
+    const markerOverlay = document.getElementById('region-marker-overlay');
+
+    const hudXY = document.getElementById('hud-xy');
+    const hudScore = document.getElementById('hud-score');
+    const hairlineH = document.getElementById('hud-hairline-h');
+    const hairlineV = document.getElementById('hud-hairline-v');
+    const viewerViewport = document.getElementById('viewer-viewport');
+
+    // ---------------- LIVE UTC CLOCK & SYSTEM TELEMETRY ----------------
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getUTCHours()).padStart(2, '0');
+      const m = String(now.getUTCMinutes()).padStart(2, '0');
+      const s = String(now.getUTCSeconds()).padStart(2, '0');
+      document.getElementById('live-utc-clock').textContent = `${h}:${m}:${s} UTC`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    async function fetchSystemStatus() {
+      try {
+        const resp = await fetch('/api/status');
+        if (resp.ok) {
+          const data = await resp.json();
+          const sys = data.system;
+          document.getElementById('chip-device-val').textContent = `DEVICE: ${sys.device}`;
+          document.getElementById('chip-camo-val').textContent = `CAMO: ${sys.camo_engine}`;
+          document.getElementById('chip-anomaly-val').textContent = `ANOMALY: ${sys.anomaly_mode}`;
+          document.getElementById('chip-yolo-val').textContent = `YOLO: ${sys.yolo_status}`;
+          
+          if (sys.yolo_online) {
+            document.getElementById('chip-yolo').classList.add('active');
+          } else {
+            document.getElementById('chip-yolo').classList.add('warning');
+          }
+
+          document.getElementById('ref-status-val').textContent = 
+            `${sys.reference_count} REF (${sys.anomaly_mode})`;
+        }
+      } catch (err) {
+        console.warn('Telemetry fetch error:', err);
+      }
+    }
+    fetchSystemStatus();
+
+    // ---------------- SLIDERS LIVE READOUTS ----------------
+    sliderCamoThresh.addEventListener('input', () => {
+      lblCamoThresh.textContent = `[ ${parseFloat(sliderCamoThresh.value).toFixed(2)} ]`;
+    });
+    sliderFusionWeight.addEventListener('input', () => {
+      const cw = Math.round(parseFloat(sliderFusionWeight.value) * 100);
+      const aw = 100 - cw;
+      lblFusionWeight.textContent = `C:${cw}% / A:${aw}%`;
+    });
+    sliderObjConf.addEventListener('input', () => {
+      lblObjConf.textContent = `[ ${parseFloat(sliderObjConf.value).toFixed(2)} ]`;
+    });
+    sliderOpacity.addEventListener('input', () => {
+      lblOpacity.textContent = `[ ${Math.round(parseFloat(sliderOpacity.value) * 100)}% ]`;
+    });
+
+    // ---------------- TACTICAL LOG WRITER ----------------
+    function appendLog(message, type = 'normal') {
+      const line = document.createElement('div');
+      line.className = `log-line ${type}`;
+      
+      const now = new Date();
+      const ts = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}`;
+      
+      const tsSpan = document.createElement('span');
+      tsSpan.className = 'log-ts';
+      tsSpan.textContent = `[${ts}]`;
+      
+      const txtSpan = document.createElement('span');
+      txtSpan.className = 'log-txt';
+      txtSpan.textContent = message.replace(/^>\s*/, '');
+      
+      line.appendChild(tsSpan);
+      line.appendChild(txtSpan);
+      logScroller.appendChild(line);
+      logScroller.scrollTop = logScroller.scrollHeight;
+    }
+
+    // ---------------- TOAST NOTIFICATIONS ----------------
+    function showToast(msg) {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast-alert';
+      t.textContent = `ALERT // ${msg}`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        setTimeout(() => t.remove(), 300);
+      }, 4500);
+    }
+
+    // ---------------- FILE UPLOAD & SAMPLES ----------------
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        handleFileSelect(fileInput.files[0]);
+      }
+    });
+
+    function handleFileSelect(file) {
+      state.activeImageFile = file;
+      state.activeSampleId = null;
+
+      // Update sample buttons state
+      document.querySelectorAll('.btn-sample').forEach(b => b.classList.remove('active'));
+
+      // Preview thumbnail
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewThumb.src = e.target.result;
+        filePreviewStrip.style.display = 'flex';
+        previewFilename.textContent = file.name.toUpperCase();
+        
+        const img = new Image();
+        img.onload = () => {
+          previewMeta.textContent = `${img.width}x${img.height} PX • ${(file.size / 1024).toFixed(1)} KB`;
+          mainViewImg.src = e.target.result;
+          splitOriginalImg.src = e.target.result;
+          mainViewImg.style.display = 'block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      appendLog(`SENSOR FILE LOADED: ${file.name.toUpperCase()}`);
+    }
+
+    async function loadSample(sampleId) {
+      state.activeSampleId = sampleId;
+      state.activeImageFile = null;
+
+      document.querySelectorAll('.btn-sample').forEach((b, i) => {
+        b.classList.toggle('active', i === sampleId - 1);
+      });
+
+      try {
+        const url = `/api/sample/${sampleId}`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Sample fetch failed');
+        const blob = await resp.blob();
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewThumb.src = e.target.result;
+          filePreviewStrip.style.display = 'flex';
+          const labels = ['FOLIAGE CAMO', 'AERIAL ANOMALY', 'SCRUB BUNKER'];
+          previewFilename.textContent = `SAMPLE-0${sampleId} [${labels[sampleId-1]}]`;
+          
+          const img = new Image();
+          img.onload = () => {
+            previewMeta.textContent = `${img.width}x${img.height} PX • SYNTHETIC RECON`;
+            mainViewImg.src = e.target.result;
+            splitOriginalImg.src = e.target.result;
+            mainViewImg.style.display = 'block';
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(blob);
+
+        appendLog(`MOUNTED SYNTHETIC TEST SAMPLE-0${sampleId}`);
+      } catch (err) {
+        showToast(`Could not load Sample ${sampleId}`);
+      }
+    }
+
+    // Default: load sample 1 on startup
+    loadSample(1);
+
+    // ---------------- RUN ANALYSIS ----------------
+    async function runAnalysis() {
+      if (!state.activeImageFile && state.activeSampleId === null) {
+        showToast('Please select or upload an image payload.');
+        return;
+      }
+
+      btnRun.disabled = true;
+      btnRun.innerHTML = '⚡ SCANNING PAYLOAD...';
+      appendLog('COMMENCING MULTI-SPECTRAL TACTICAL SCAN...');
+
+      const formData = new FormData();
+      if (state.activeImageFile) {
+        formData.append('image', state.activeImageFile);
+      } else {
+        formData.append('sample_id', state.activeSampleId);
+      }
+
+      formData.append('camo_threshold', sliderCamoThresh.value);
+      formData.append('camo_weight', sliderFusionWeight.value);
+      formData.append('anomaly_weight', (1.0 - parseFloat(sliderFusionWeight.value)).toFixed(2));
+      formData.append('object_conf', sliderObjConf.value);
+      formData.append('overlay_opacity', sliderOpacity.value);
+
+      formData.append('enable_camo', chkEnableCamo.checked);
+      formData.append('enable_anomaly', chkEnableAnomaly.checked);
+      formData.append('enable_objects', chkEnableObjects.checked);
+
+      try {
+        const resp = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.error || 'Tactical analysis pipeline error');
+        }
+
+        state.currentResult = data;
+        renderAnalysisResults(data);
+
+      } catch (err) {
+        appendLog(`ERROR // ${err.message}`, 'error');
+        showToast(err.message);
+      } finally {
+        btnRun.disabled = false;
+        btnRun.innerHTML = '⚡ RUN TACTICAL ANALYSIS';
+      }
+    }
+
+    // ---------------- RENDER ANALYSIS RESULTS ----------------
+    function renderAnalysisResults(data) {
+      // 1. Logs
+      if (data.logs && Array.isArray(data.logs)) {
+        data.logs.forEach(l => appendLog(l));
+      }
+
+      // 2. Threat Index Gauge
+      const idx = data.threat_index;
+      document.getElementById('threat-index-val').textContent = idx;
+      document.getElementById('threat-index-val').style.color = data.threat_color;
+      
+      const badge = document.getElementById('threat-level-badge');
+      badge.textContent = data.threat_level;
+      badge.style.borderColor = data.threat_color;
+      badge.style.color = data.threat_color;
+
+      // Arc stroke dashoffset: circumference of semi-circle = pi * r = 3.14159 * 65 = 204.2
+      const maxOffset = 204.2;
+      const targetOffset = maxOffset - (idx / 100.0) * maxOffset;
+      const arc = document.getElementById('gauge-arc');
+      arc.style.strokeDashoffset = targetOffset;
+      arc.style.stroke = data.threat_color;
+
+      // 3. Ranked Regions Table & Markers
+      const tbodyReg = document.getElementById('tbody-regions');
+      tbodyReg.innerHTML = '';
+      markerOverlay.innerHTML = '';
+
+      if (data.ranked_regions && data.ranked_regions.length > 0) {
+        document.getElementById('lbl-anom-count').textContent = `${data.ranked_regions.length} SECTORS`;
+        data.ranked_regions.forEach((reg, i) => {
+          const row = document.createElement('tr');
+          row.id = `reg-row-${i}`;
+          
+          const pctBar = Math.min(100, Math.round(reg.mean_score * 100));
+          const barColor = reg.mean_score >= 0.75 ? 'var(--red-alert)' : (reg.mean_score >= 0.55 ? 'var(--amber-warn)' : 'var(--accent-lime)');
+
+          row.innerHTML = `
+            <td class="rank-tag">${reg.rank}</td>
+            <td style="font-family:var(--font-mono)">[${reg.box.join(',')}]</td>
+            <td>${reg.area_pct}%</td>
+            <td>
+              <div class="score-cell">
+                <span class="score-tag" style="color:${barColor}">${reg.mean_score.toFixed(3)}</span>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pctBar}%; background:${barColor}"></div></div>
+              </div>
+            </td>
+          `;
+          row.addEventListener('mouseenter', () => highlightRegionMarker(i));
+          row.addEventListener('click', () => highlightRegionMarker(i));
+          tbodyReg.appendChild(row);
+
+          // Add interactive marker pin over the image
+          createRegionMarkerPin(reg, i, data.dimensions);
+        });
+      } else {
+        document.getElementById('lbl-anom-count').textContent = `0 SECTORS`;
+        tbodyReg.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:12px;">NO ANOMALIES RECORDED</td></tr>';
+      }
+
+      // 4. Detected Objects Table
+      const tbodyObj = document.getElementById('tbody-objects');
+      tbodyObj.innerHTML = '';
+      if (data.detections && data.detections.length > 0) {
+        document.getElementById('lbl-obj-count').textContent = `${data.detections.length} CONTACTS`;
+        data.detections.forEach(det => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><span class="obj-badge">${det.label.toUpperCase()}</span></td>
+            <td style="color:var(--accent-lime);font-weight:700">${(det.score * 100).toFixed(0)}%</td>
+            <td style="color:var(--text-muted)">[${det.box.join(',')}]</td>
+          `;
+          tbodyObj.appendChild(row);
+        });
+      } else {
+        document.getElementById('lbl-obj-count').textContent = `0 CONTACTS`;
+        tbodyObj.innerHTML = '<tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:12px;">NO OBJECT CONTACTS</td></tr>';
+      }
+
+      // 5. Timings Breakdown
+      const t = data.timings;
+      document.getElementById('time-camo').textContent = `${t.camo_s}s`;
+      document.getElementById('time-anomaly').textContent = `${t.anomaly_s}s`;
+      document.getElementById('time-objects').textContent = `${t.objects_s}s`;
+      document.getElementById('time-fusion').textContent = `${t.fusion_s}s`;
+
+      const maxT = Math.max(t.camo_s, t.anomaly_s, t.objects_s, t.fusion_s, 0.001);
+      document.getElementById('bar-camo').style.width = `${(t.camo_s / maxT) * 100}%`;
+      document.getElementById('bar-anomaly').style.width = `${(t.anomaly_s / maxT) * 100}%`;
+      document.getElementById('bar-objects').style.width = `${(t.objects_s / maxT) * 100}%`;
+      document.getElementById('bar-fusion').style.width = `${(t.fusion_s / maxT) * 100}%`;
+
+      // 6. Display active overlay layer
+      displayLayer(state.activeLayer);
+    }
+
+    // ---------------- LAYER SWITCHING ----------------
+    const layerTabs = document.querySelectorAll('.layer-tab');
+    layerTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        layerTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        state.activeLayer = tab.dataset.layer;
+        displayLayer(state.activeLayer);
+      });
+    });
+
+    function displayLayer(layerName) {
+      if (!state.currentResult || !state.currentResult.overlays) return;
+      const b64 = state.currentResult.overlays[layerName] || state.currentResult.overlays['original'];
+      mainViewImg.src = b64;
+      mainViewImg.style.display = 'block';
+
+      if (state.currentResult.overlays['original']) {
+        splitOriginalImg.src = state.currentResult.overlays['original'];
+      }
+    }
+
+    // ---------------- INTERACTIVE TACTICAL MARKERS ----------------
+    function createRegionMarkerPin(reg, index, dims) {
+      const pin = document.createElement('div');
+      pin.className = 'tactical-marker-pin';
+      pin.id = `marker-pin-${index}`;
+
+      const [cx, cy] = reg.centroid;
+      const [iw, ih] = dims.inference;
+
+      // Coordinate percentage inside inference image
+      const leftPct = (cx / iw) * 100;
+      const topPct = (cy / ih) * 100;
+
+      pin.style.left = `${leftPct}%`;
+      pin.style.top = `${topPct}%`;
+
+      const pinColor = reg.mean_score >= 0.75 ? 'var(--red-alert)' : (reg.mean_score >= 0.55 ? 'var(--amber-warn)' : 'var(--accent-lime)');
+
+      pin.innerHTML = `
+        <div class="pin-ring" style="border-color:${pinColor}; background:rgba(214,69,69,0.2)">
+          <div class="pin-center" style="background:${pinColor}"></div>
+        </div>
+        <div class="pin-label" style="border-color:${pinColor}; color:${pinColor}">
+          ${reg.rank} // ${reg.mean_score.toFixed(2)}
+        </div>
+      `;
+
+      pin.addEventListener('mouseenter', (e) => {
+        e.stopPropagation();
+        highlightRegionMarker(index);
+      });
+      pin.addEventListener('click', (e) => {
+        e.stopPropagation();
+        highlightRegionMarker(index);
+      });
+
+      markerOverlay.appendChild(pin);
+    }
+
+    function highlightRegionMarker(index) {
+      document.querySelectorAll('.tactical-marker-pin').forEach(p => p.classList.remove('active-pin'));
+      document.querySelectorAll('#tbody-regions tr').forEach(r => r.classList.remove('active-row'));
+
+      const targetPin = document.getElementById(`marker-pin-${index}`);
+      const targetRow = document.getElementById(`reg-row-${index}`);
+      
+      if (targetPin) {
+        targetPin.classList.add('active-pin');
+      }
+      if (targetRow) {
+        targetRow.classList.add('active-row');
+      }
+    }
+
+    // ---------------- BEFORE/AFTER SPLIT COMPARISON SLIDER ----------------
+    function toggleSplitView() {
+      state.splitViewActive = !state.splitViewActive;
+      const btn = document.getElementById('btn-toggle-split');
+      btn.classList.toggle('active', state.splitViewActive);
+
+      if (state.splitViewActive) {
+        splitContainer.style.display = 'block';
+        updateSplitPosition(state.splitPercent);
+      } else {
+        splitContainer.style.display = 'none';
+      }
+    }
+
+    splitHandle.addEventListener('mousedown', (e) => {
+      state.isDraggingSplit = true;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mouseup', () => {
+      state.isDraggingSplit = false;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!state.isDraggingSplit || !state.splitViewActive) return;
+      const rect = canvasStage.getBoundingClientRect();
+      const clientX = e.clientX;
+      let pct = ((clientX - rect.left) / rect.width) * 100;
+      pct = Math.max(5, Math.min(95, pct));
+      state.splitPercent = pct;
+      updateSplitPosition(pct);
+    });
+
+    function updateSplitPosition(pct) {
+      splitHandle.style.left = `${pct}%`;
+      splitLeftLayer.style.width = `${pct}%`;
+    }
+
+    // ---------------- ZOOM AND PAN CONTROLS ----------------
+    function updateStageTransform() {
+      canvasStage.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoomLevel})`;
+    }
+
+    function zoomIn() {
+      state.zoomLevel = Math.min(4.0, state.zoomLevel + 0.25);
+      updateStageTransform();
+    }
+    function zoomOut() {
+      state.zoomLevel = Math.max(0.5, state.zoomLevel - 0.25);
+      updateStageTransform();
+    }
+    function resetZoom() {
+      state.zoomLevel = 1.0;
+      state.panX = 0;
+      state.panY = 0;
+      updateStageTransform();
+    }
+
+    viewerViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        zoomIn();
+      } else {
+        zoomOut();
+      }
+    }, { passive: false });
+
+    // Interactive Crosshairs & Coordinate Tracking
+    viewerViewport.addEventListener('mouseenter', () => {
+      hairlineH.style.display = 'block';
+      hairlineV.style.display = 'block';
+    });
+    viewerViewport.addEventListener('mouseleave', () => {
+      hairlineH.style.display = 'none';
+      hairlineV.style.display = 'none';
+      hudXY.textContent = 'X: ---  Y: ---';
+      hudScore.textContent = '---';
+    });
+    viewerViewport.addEventListener('mousemove', (e) => {
+      const vpRect = viewerViewport.getBoundingClientRect();
+      const relX = e.clientX - vpRect.left;
+      const relY = e.clientY - vpRect.top;
+      hairlineH.style.top = `${relY}px`;
+      hairlineV.style.left = `${relX}px`;
+
+      const rect = mainViewImg.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        const xRel = e.clientX - rect.left;
+        const yRel = e.clientY - rect.top;
+        if (xRel >= 0 && xRel <= rect.width && yRel >= 0 && yRel <= rect.height) {
+          const px = Math.round((xRel / rect.width) * (mainViewImg.naturalWidth || 640));
+          const py = Math.round((yRel / rect.height) * (mainViewImg.naturalHeight || 640));
+          hudXY.textContent = `X:${String(px).padStart(3, '0')}  Y:${String(py).padStart(3, '0')}`;
+          
+          // Check if hovering over any detected anomaly region
+          if (state.currentResult && state.currentResult.ranked_regions && state.currentResult.ranked_regions.length > 0) {
+            let foundReg = null;
+            for (const reg of state.currentResult.ranked_regions) {
+              const [bx, by, bw, bh] = reg.box;
+              if (px >= bx && px <= bx + bw && py >= by && py <= by + bh) {
+                foundReg = reg;
+                break;
+              }
+            }
+            if (foundReg) {
+              hudScore.textContent = `${foundReg.rank} (${foundReg.mean_score.toFixed(2)})`;
+              hudScore.style.color = 'var(--red-alert)';
+            } else {
+              hudScore.textContent = 'CLEAR SECTOR';
+              hudScore.style.color = 'var(--accent-lime)';
+            }
+          } else {
+            hudScore.textContent = 'STANDBY';
+            hudScore.style.color = 'var(--accent-lime)';
+          }
+        }
+      }
+    });
+
+    // ---------------- REFERENCE IMAGE MANAGEMENT ----------------
+    const refFileInput = document.getElementById('ref-file-input');
+    refFileInput.addEventListener('change', async () => {
+      if (refFileInput.files.length === 0) return;
+      const formData = new FormData();
+      for (let i = 0; i < refFileInput.files.length; i++) {
+        formData.append('reference_images', refFileInput.files[i]);
+      }
+
+      appendLog(`UPLOADING ${refFileInput.files.length} REFERENCE TERRAIN IMAGES...`);
+      try {
+        const resp = await fetch('/api/reference', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Failed to upload references');
+        appendLog(`MEMORY BANK REBUILT: ${data.message}`);
+        fetchSystemStatus();
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+
+    async function clearReferences() {
+      if (!confirm('Clear all reference terrain data and revert to self-reference mode?')) return;
+      try {
+        const resp = await fetch('/api/reference', { method: 'DELETE' });
+        const data = await resp.json();
+        appendLog('REFERENCE TERRAIN DATA CLEARED (SELF-REFERENCE ACTIVE)');
+        fetchSystemStatus();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    // ---------------- EXPORT CLIENT-SIDE REPORT PNG (CANVAS) ----------------
+    function exportReportPNG() {
+      if (!state.currentResult) {
+        showToast('No analysis available. Please run analysis first.');
+        return;
+      }
+
+      appendLog('GENERATING CLIENT-SIDE MISSION SITREP REPORT...');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+
+      // Tactical Dossier Background
+      ctx.fillStyle = '#080b06';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Border & Grid
+      ctx.strokeStyle = '#384525';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+      // Header Bar
+      ctx.fillStyle = '#0d1209';
+      ctx.fillRect(22, 22, canvas.width - 44, 60);
+      ctx.fillStyle = '#9acd32';
+      ctx.font = 'bold 20px "JetBrains Mono", monospace';
+      ctx.fillText('TERRASCAN-AI // TACTICAL MISSION SITREP DOSSIER', 40, 58);
+
+      const utcTime = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+      ctx.fillStyle = '#c9d6a3';
+      ctx.font = '12px "JetBrains Mono", monospace';
+      ctx.fillText(`DATE: ${utcTime}  |  STATUS: CLASSIFIED TACTICAL`, 740, 58);
+
+      // Embed Base Original & Suspicion Heatmap
+      const origImg = new Image();
+      const suspImg = new Image();
+
+      origImg.src = state.currentResult.overlays.original;
+      origImg.onload = () => {
+        ctx.drawImage(origImg, 40, 100, 380, 380);
+        ctx.strokeStyle = '#384525';
+        ctx.strokeRect(40, 100, 380, 380);
+        ctx.fillStyle = '#9acd32';
+        ctx.fillText('[ 01 // SENSOR PAYLOAD (ORIGINAL) ]', 40, 500);
+
+        suspImg.src = state.currentResult.overlays.all_layers || state.currentResult.overlays.suspicion;
+        suspImg.onload = () => {
+          ctx.drawImage(suspImg, 450, 100, 380, 380);
+          ctx.strokeRect(450, 100, 380, 380);
+          ctx.fillText('[ 02 // FUSED SUSPICION & TARGET HUD ]', 450, 500);
+
+          // Threat Index Box (Right)
+          ctx.fillStyle = '#0d1209';
+          ctx.fillRect(860, 100, 300, 130);
+          ctx.strokeRect(860, 100, 300, 130);
+          ctx.fillStyle = '#c9d6a3';
+          ctx.fillText('TACTICAL THREAT INDEX', 880, 130);
+
+          ctx.fillStyle = state.currentResult.threat_color || '#9acd32';
+          ctx.font = 'bold 44px "JetBrains Mono", monospace';
+          ctx.fillText(`${state.currentResult.threat_index} / 100`, 880, 185);
+
+          ctx.font = 'bold 12px "JetBrains Mono", monospace';
+          ctx.fillText(`LEVEL: ${state.currentResult.threat_level}`, 880, 215);
+
+          // Top Regions Table Box
+          ctx.fillStyle = '#0d1209';
+          ctx.fillRect(860, 250, 300, 230);
+          ctx.strokeRect(860, 250, 300, 230);
+          ctx.fillStyle = '#9acd32';
+          ctx.fillText('TOP SUSPICIOUS TARGETS', 880, 275);
+
+          ctx.fillStyle = '#c9d6a3';
+          ctx.font = '11px "JetBrains Mono", monospace';
+          let rowY = 305;
+          ctx.fillText('RANK   AREA%   SCORE   BOUNDS', 880, rowY);
+          rowY += 15;
+          ctx.strokeStyle = '#1e2614';
+          ctx.beginPath();
+          ctx.moveTo(880, rowY); ctx.lineTo(1140, rowY);
+          ctx.stroke();
+          rowY += 20;
+
+          if (state.currentResult.ranked_regions) {
+            state.currentResult.ranked_regions.forEach(r => {
+              ctx.fillText(`${r.rank.padEnd(6)} ${String(r.area_pct).padStart(4)}%   ${r.mean_score.toFixed(2)}    [${r.box.join(',')}]`, 880, rowY);
+              rowY += 22;
+            });
+          }
+
+          // Mission Telemetry Summary Box (Bottom)
+          ctx.fillStyle = '#0d1209';
+          ctx.fillRect(40, 530, 1120, 220);
+          ctx.strokeRect(40, 530, 1120, 220);
+          ctx.fillStyle = '#9acd32';
+          ctx.fillText('MISSION LOG & HEURISTIC SENSOR ATTRIBUTION', 60, 560);
+
+          ctx.fillStyle = '#6b7c52';
+          ctx.font = '10px "JetBrains Mono", monospace';
+          ctx.fillText('DISCLAIMER: The Threat Index is an empirical heuristic combining multi-frequency cluster disparity,', 60, 585);
+          ctx.fillText('color opponent contrast, and outlier kNN density. It does not represent a calibrated Bayesian posterior.', 60, 600);
+          ctx.fillText('False positives may occur on road cuts, shadows, water boundaries, or specular tree crown reflections.', 60, 615);
+
+          // Trigger Download
+          const link = document.createElement('a');
+          link.download = `terrascan_sitrep_${Date.now()}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          appendLog('MISSION DOSSIER PNG DOWNLOADED TO LOCAL OPERATOR TERMINAL');
+        };
+      };
+    }
+
+    // ---------------- EXPORT JSON ----------------
+    function exportAnalysisJSON() {
+      if (!state.currentResult) {
+        showToast('No analysis available to export.');
+        return;
+      }
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state.currentResult, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `terrascan_sitrep_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      appendLog('TACTICAL JSON TELEMETRY DOWNLOADED');
+    }
+
+    // ---------------- CLEAR / RESET ----------------
+    function clearAnalysis() {
+      state.currentResult = null;
+      mainViewImg.src = '';
+      mainViewImg.style.display = 'none';
+      splitOriginalImg.src = '';
+      splitContainer.style.display = 'none';
+      state.splitViewActive = false;
+      document.getElementById('btn-toggle-split').classList.remove('active');
+      markerOverlay.innerHTML = '';
+
+      document.getElementById('threat-index-val').textContent = '0';
+      document.getElementById('threat-index-val').style.color = 'var(--accent-lime)';
+      document.getElementById('gauge-arc').style.strokeDashoffset = '204.2';
+      document.getElementById('threat-level-badge').textContent = 'SYSTEM STANDBY';
+      document.getElementById('tbody-regions').innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:12px;">NO ANOMALIES RECORDED</td></tr>';
+      document.getElementById('tbody-objects').innerHTML = '<tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:12px;">NO OBJECT CONTACTS</td></tr>';
+      document.getElementById('lbl-anom-count').textContent = '0 SECTORS';
+      document.getElementById('lbl-obj-count').textContent = '0 CONTACTS';
+
+      appendLog('SYSTEM STATE CLEARED AND RESET TO IDLE');
+    }
+
+    // ---------------- KEYBOARD SHORTCUTS ----------------
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+
+      if (e.key === 'r' || e.key === 'R') {
+        runAnalysis();
+      } else if (e.key === 's' || e.key === 'S') {
+        toggleSplitView();
+      } else if (e.key === 'Escape') {
+        clearAnalysis();
+      } else if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const layerMap = {
+          '1': 'original',
+          '2': 'camouflage',
+          '3': 'anomaly',
+          '4': 'objects',
+          '5': 'suspicion',
+          '6': 'all_layers'
+        };
+        const layer = layerMap[e.key];
+        const tab = document.querySelector(`.layer-tab[data-layer="${layer}"]`);
+        if (tab) tab.click();
+      }
+    });
+  </script>
+</body>
+</html>
