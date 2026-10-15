@@ -25,18 +25,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger("terrascan")
 
+# Set TORCH_HOME to /tmp on serverless or read-only environments
+import tempfile
+if "TORCH_HOME" not in os.environ:
+    os.environ["TORCH_HOME"] = os.path.join(tempfile.gettempdir(), "torch")
+
 # Base directory configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 REFERENCE_DIR = os.path.join(BASE_DIR, "data", "reference")
 SAMPLES_DIR = os.path.join(BASE_DIR, "samples")
 
-os.makedirs(MODELS_DIR, exist_ok=True)
-os.makedirs(REFERENCE_DIR, exist_ok=True)
-os.makedirs(SAMPLES_DIR, exist_ok=True)
-
-# Generate synthetic samples if not present
-ensure_sample_images(SAMPLES_DIR)
+try:
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    os.makedirs(REFERENCE_DIR, exist_ok=True)
+    os.makedirs(SAMPLES_DIR, exist_ok=True)
+    ensure_sample_images(SAMPLES_DIR)
+except OSError as e:
+    logger.warning("Filesystem is read-only or restricted: %s", e)
 
 # Initialize Flask application
 app = Flask(__name__, template_folder="templates", static_folder="static")

@@ -36,9 +36,24 @@ class ObjectDetector:
 
         self._initialized = True
         try:
-            from ultralytics import YOLO
-            # YOLO auto-downloads yolov8n.pt if not locally present
-            self._model = YOLO(self.model_name)
+            import os
+            import tempfile
+            target_path = self.model_name
+            if not os.path.exists(target_path):
+                tmp_path = os.path.join(tempfile.gettempdir(), os.path.basename(self.model_name))
+                if os.path.exists(tmp_path):
+                    target_path = tmp_path
+                else:
+                    try:
+                        # Test if current dir is writable
+                        with open(".write_test", "w") as f:
+                            f.write("1")
+                        os.remove(".write_test")
+                    except OSError:
+                        target_path = tmp_path
+
+            # YOLO auto-downloads if not present at target_path
+            self._model = YOLO(target_path)
             self._available = True
             logger.info("YOLOv8 detector successfully loaded.")
             return True
